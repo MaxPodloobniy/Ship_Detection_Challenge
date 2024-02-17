@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
+
 # Зчитуємо дані з файлу CSV
-df = pd.read_csv('/Users/maxim/airbus-ship-detection/airbus-ship-detection/train_ship_segmentations_v2.csv')
-print('File read')
+#df = pd.read_csv('/Users/maxim/airbus-ship-detection/airbus-ship-detection/train_ship_segmentations_v2.csv')
 
 
 # Function for decoding Run Length Encoding
@@ -34,28 +34,31 @@ def decode_rle(rle_str, img_shape):
         return decoded_mask.T
 
 
-def decode_rle_vectorized(rle_str, image_shape=(768, 768)):
+def decode_and_save_rle_vectorized(rle_str, image_id, image_shape=(768, 768)):
     decoded_image = np.zeros(image_shape, dtype=np.uint8)
     if rle_str != 'nan':
-        pairs = np.array(rle_str.split(), dtype=np.int32) - 1
+        pairs = np.array(rle_str.split(), dtype=np.int32)
         start = pairs[::2]
         length = pairs[1::2]
         row = start // image_shape[1]
         col = start % image_shape[1]
         for r, c, l in zip(row, col, length):
             decoded_image[r, c:c + l] = 255
-    return decoded_image.T
+        decoded_image = decoded_image.T
+    image_path = f'masks/{image_id}'
+    plt.imsave(image_path, decoded_image)
 
 
 chunks = pd.read_csv('/Users/maxim/airbus-ship-detection/airbus-ship-detection/train_ship_segmentations_v2.csv',
                      chunksize=4000)
+print('File read')
+
 for i, chunk in enumerate(chunks):
-    print('Entered cycle')
-    # Обробка кожної частини
+    if i % 2 == 0:
+        print(f'Processing {i} chunk')
     grouped_df = chunk.groupby('ImageId')['EncodedPixels'].apply(lambda x: x.str.cat(sep=' ')).reset_index()
-    grouped_df['EncodedPixels'] = grouped_df['EncodedPixels'].apply(lambda x: decode_rle_vectorized(x, (768, 768)))
-    grouped_df.to_csv(f'mask_chunks/processed_chunk_{i}.csv', index=False)
-    print('Exit cycle')
+    grouped_df['EncodedPixels'] = grouped_df.apply(
+        lambda row: decode_and_save_rle_vectorized(row['EncodedPixels'], row['ImageId']), axis=1)
 
 
 
