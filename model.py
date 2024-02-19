@@ -5,7 +5,7 @@ from tensorflow import io as tf_io
 from tensorflow import keras
 
 
-def get_dataset(img_paths, mask_paths, batch_size=32, img_size=(768, 768), dataset_size=30000):
+def get_dataset(img_paths, mask_paths, batch_size=16, img_size=(768, 768), dataset_size=30000):
     def load_data(img_path, mask_path):
         input_img = tf_io.read_file(img_path)
         input_img = tf_io.decode_png(input_img, channels=3)
@@ -19,14 +19,17 @@ def get_dataset(img_paths, mask_paths, batch_size=32, img_size=(768, 768), datas
 
         return input_img, mask
 
-    dataset = tf_data.Dataset.from_tensor_slices((img_paths[:dataset_size], mask_paths[:dataset_size]))
+    dataset = tf_data.Dataset.from_tensor_slices((img_paths, mask_paths))
     dataset = dataset.map(load_data, num_parallel_calls=tf_data.AUTOTUNE)
     return dataset.batch(batch_size)
 
 
+img_dir = '/Users/maxim/images/train_v2'
+mask_dir = '/Users/maxim/masks/masks/'
+
 # Отримуємо список файлів у папках та сортуємо їх
-img_paths = sorted(os.listdir('images/'))
-mask_paths = sorted(os.listdir('masks/'))
+img_paths = [os.path.join(img_dir, str(filename)) for filename in sorted(os.listdir(img_dir)[:50000])]
+mask_paths = [os.path.join(mask_dir, str(filename)) for filename in sorted(os.listdir(mask_dir)[:50000])]
 print('Image paths loaded')
 
 val_samples = 8000
@@ -63,29 +66,39 @@ pool4 = keras.layers.MaxPooling2D(pool_size=(2, 2))(conv4)
 
 conv5 = keras.layers.Conv2D(128, 3, activation='relu', padding='same')(pool4)
 conv5 = keras.layers.Conv2D(128, 3, activation='relu', padding='same')(conv5)
+pool5 = keras.layers.MaxPooling2D(pool_size=(2, 2))(conv5)
+
+conv6 = keras.layers.Conv2D(256, 3, activation='relu', padding='same')(pool5)
+conv6 = keras.layers.Conv2D(256, 3, activation='relu', padding='same')(conv6)
+
 
 # Перевернення (англ. Upsampling)
-up6 = keras.layers.Conv2DTranspose(64, 2, strides=(2, 2), padding='same')(conv5)
-up6 = keras.layers.concatenate([up6, conv4], axis=3)
-conv6 = keras.layers.Conv2D(64, 3, activation='relu', padding='same')(up6)
-conv6 = keras.layers.Conv2D(64, 3, activation='relu', padding='same')(conv6)
+up7 = keras.layers.Conv2DTranspose(128, 2, strides=(2, 2), padding='same')(conv6)
+up7 = keras.layers.concatenate([up7, conv5], axis=3)
+conv7 = keras.layers.Conv2D(128, 3, activation='relu', padding='same')(up7)
+conv7 = keras.layers.Conv2D(128, 3, activation='relu', padding='same')(conv7)
 
-up7 = keras.layers.Conv2DTranspose(32, 2, strides=(2, 2), padding='same')(conv6)
-up7 = keras.layers.concatenate([up7, conv3], axis=3)
-conv7 = keras.layers.Conv2D(32, 3, activation='relu', padding='same')(up7)
-conv7 = keras.layers.Conv2D(32, 3, activation='relu', padding='same')(conv7)
+up8 = keras.layers.Conv2DTranspose(64, 2, strides=(2, 2), padding='same')(conv7)
+up8 = keras.layers.concatenate([up8, conv4], axis=3)
+conv8 = keras.layers.Conv2D(64, 3, activation='relu', padding='same')(up8)
+conv8 = keras.layers.Conv2D(64, 3, activation='relu', padding='same')(conv8)
 
-up8 = keras.layers.Conv2DTranspose(16, 2, strides=(2, 2), padding='same')(conv7)
-up8 = keras.layers.concatenate([up8, conv2], axis=3)
-conv8 = keras.layers.Conv2D(16, 3, activation='relu', padding='same')(up8)
-conv8 = keras.layers.Conv2D(16, 3, activation='relu', padding='same')(conv8)
+up9 = keras.layers.Conv2DTranspose(32, 2, strides=(2, 2), padding='same')(conv8)
+up9 = keras.layers.concatenate([up9, conv3], axis=3)
+conv9 = keras.layers.Conv2D(32, 3, activation='relu', padding='same')(up9)
+conv9 = keras.layers.Conv2D(32, 3, activation='relu', padding='same')(conv9)
 
-up9 = keras.layers.Conv2DTranspose(8, 2, strides=(2, 2), padding='same')(conv8)
-up9 = keras.layers.concatenate([up9, conv1], axis=3)
-conv9 = keras.layers.Conv2D(8, 3, activation='relu', padding='same')(up9)
-conv9 = keras.layers.Conv2D(8, 3, activation='relu', padding='same')(conv9)
+up10 = keras.layers.Conv2DTranspose(16, 2, strides=(2, 2), padding='same')(conv9)
+up10 = keras.layers.concatenate([up10, conv2], axis=3)
+conv10 = keras.layers.Conv2D(16, 3, activation='relu', padding='same')(up10)
+conv10 = keras.layers.Conv2D(16, 3, activation='relu', padding='same')(conv10)
 
-outputs = keras.layers.Conv2D(1, 1, activation='sigmoid')(conv9)
+up11 = keras.layers.Conv2DTranspose(8, 2, strides=(2, 2), padding='same')(conv10)
+up11 = keras.layers.concatenate([up11, conv1], axis=3)
+conv11 = keras.layers.Conv2D(8, 3, activation='relu', padding='same')(up11)
+conv11 = keras.layers.Conv2D(8, 3, activation='relu', padding='same')(conv11)
+
+outputs = keras.layers.Conv2D(1, 1, activation='sigmoid')(conv11)
 
 model = keras.Model(inputs, outputs)
 
@@ -100,4 +113,4 @@ callbacks = [
 ]
 
 # Навчання моделі
-model.fit(train_dataset, epochs=30, verbose=2, validation_data=valid_dataset, callbacks=callbacks)
+model.fit(train_dataset, epochs=30, verbose=2, batch_size=16, validation_data=valid_dataset, callbacks=callbacks)
