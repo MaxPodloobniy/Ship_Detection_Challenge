@@ -5,15 +5,15 @@ from tensorflow import io as tf_io
 from tensorflow import keras
 
 
-def get_dataset(img_paths, mask_paths, batch_size=16, img_size=(768, 768), dataset_size=30000):
+def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=32):
     def load_data(img_path, mask_path):
         input_img = tf_io.read_file(img_path)
-        input_img = tf_io.decode_png(input_img, channels=3)
+        input_img = tf_io.decode_jpeg(input_img, channels=3)
         input_img = tf_image.resize(input_img, img_size)
         input_img = tf_image.convert_image_dtype(input_img, "float32")
 
         mask = tf_io.read_file(mask_path)
-        mask = tf_io.decode_png(mask, channels=1)
+        mask = tf_io.decode_jpeg(mask, channels=1)
         mask = tf_image.resize(mask, img_size, method="nearest")
         mask = tf_image.convert_image_dtype(mask, "uint8")
 
@@ -21,18 +21,20 @@ def get_dataset(img_paths, mask_paths, batch_size=16, img_size=(768, 768), datas
 
     dataset = tf_data.Dataset.from_tensor_slices((img_paths, mask_paths))
     dataset = dataset.map(load_data, num_parallel_calls=tf_data.AUTOTUNE)
-    return dataset.batch(batch_size)
+    dataset = dataset.batch(batch_size)
+    return dataset
 
 
-img_dir = '/Users/maxim/images/train_v2'
-mask_dir = '/Users/maxim/masks/masks/'
+img_dir = '/kaggle/input/airbus-ship-detection/train_v2'
+mask_dir = '/kaggle/input/masks-for-ships/masks'
+
 
 # Отримуємо список файлів у папках та сортуємо їх
 img_paths = [os.path.join(img_dir, str(filename)) for filename in sorted(os.listdir(img_dir)[:50000])]
 mask_paths = [os.path.join(mask_dir, str(filename)) for filename in sorted(os.listdir(mask_dir)[:50000])]
 print('Image paths loaded')
 
-val_samples = 8000
+val_samples = 10000
 train_input_img_paths = img_paths[:-val_samples]
 train_target_img_paths = mask_paths[:-val_samples]
 val_input_img_paths = img_paths[-val_samples:]
@@ -45,7 +47,7 @@ print('Datasets created')
 
 
 # Побудова моделі U-Net
-inputs = keras.Input(shape=(768, 768, 3))
+inputs = keras.Input(shape=(768, 768, 3,))
 
 # Зведення (англ. Downsampling)
 conv1 = keras.layers.Conv2D(8, 3, activation='relu', padding='same')(inputs)
@@ -113,4 +115,4 @@ callbacks = [
 ]
 
 # Навчання моделі
-model.fit(train_dataset, epochs=30, verbose=2, batch_size=16, validation_data=valid_dataset, callbacks=callbacks)
+model.fit(train_dataset, epochs=30, validation_data=valid_dataset, callbacks=callbacks)
