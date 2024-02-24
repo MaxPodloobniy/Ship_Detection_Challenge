@@ -25,7 +25,7 @@ def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=32):
     return dataset
 
 
-'''img_dir = '/Users/maxim/Desktop/train_v2'
+img_dir = '/Users/maxim/Desktop/train_v2'
 mask_dir = '/Users/maxim/Desktop/masks'
 
 # Отримуємо список файлів у папках та сортуємо їх
@@ -43,7 +43,7 @@ print('Paths arrays sliced')
 train_dataset = get_dataset(train_input_img_paths, train_target_img_paths)
 valid_dataset = get_dataset(val_input_img_paths, val_target_img_paths)
 print('Datasets created')
-'''
+
 
 # Побудова моделі U-Net
 inputs = keras.Input(shape=(768, 768, 3,))
