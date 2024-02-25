@@ -3,9 +3,11 @@ from tensorflow import data as tf_data
 from tensorflow import image as tf_image
 from tensorflow import io as tf_io
 from tensorflow import keras
+from keras.callbacks import ModelCheckpoint, LearningRateScheduler, EarlyStopping, ReduceLROnPlateau
+import keras.backend as K
 
 
-def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=32):
+def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=16):
     def load_data(img_path, mask_path):
         input_img = tf_io.read_file(img_path)
         input_img = tf_io.decode_jpeg(input_img, channels=3)
@@ -15,7 +17,7 @@ def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=32):
         mask = tf_io.read_file(mask_path)
         mask = tf_io.decode_jpeg(mask, channels=1)
         mask = tf_image.resize(mask, img_size, method="nearest")
-        mask = tf_image.convert_image_dtype(mask, "uint8")
+        mask = tf_image.convert_image_dtype(mask, "float32")
 
         return input_img, mask
 
@@ -125,25 +127,32 @@ outputs = keras.layers.Conv2D(1, 1, activation='sigmoid')(conv11)
 
 model = keras.Model(inputs, outputs)
 
+
+
+def dice_coef(y_true, y_pred, smooth=1):
+    intersection = K.sum(y_true * y_pred, axis=[1,2,3])
+    union = K.sum(y_true, axis=[1,2,3]) + K.sum(y_pred, axis=[1,2,3])
+    return K.mean((2. * intersection + smooth) / (union + smooth), axis=0)
+
+
+def dice_p_bce(in_gt, in_pred):
+    return 1e-3*keras.losses.binary_crossentropy(in_gt, in_pred) - dice_coef(in_gt, in_pred)
+
+
+ReduceLROnPlateau(monitor='val_dice_coef', factor=0.5,  patience=3,  verbose=1, mode='max', epsilon=0.0001, cooldown=2, min_lr=1e-6)
+
 # Компіляція моделі
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=keras.optimizers.Adam(1e-4, decay=1e-6), loss=dice_p_bce, metrics=[dice_coef, 'binary_accuracy'])
 
 model.summary()
 
-
-# Learning Rate Scheduler
-def lr_scheduler(epoch, lr):
-    if epoch % 10 == 0 and epoch > 0:
-        return lr * 0.9
-    else:
-        return lr
-
-
 callbacks = [
-    keras.callbacks.ModelCheckpoint("unet_low_filters_model.keras", save_best_only=True),
+    keras.callbacks.ModelCheckpoint("unet_low_filters_model.keras", save_best_only=True, verbose=1),
     keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=1),
-    keras.callbacks.LearningRateScheduler(lr_scheduler)
+    keras.callbacks.ReduceLROnPlateau(monitor='val_dice_coef', factor=0.5,
+                                      patience=3,  verbose=1, mode='max',
+                                      epsilon=0.0001, cooldown=2, min_lr=1e-6)
 ]
 
 # Навчання моделі
-#model.fit(train_dataset, epochs=30, validation_data=valid_dataset, callbacks=callbacks)
+model.fit(train_dataset, epochs=30, validation_data=valid_dataset, callbacks=callbacks)
