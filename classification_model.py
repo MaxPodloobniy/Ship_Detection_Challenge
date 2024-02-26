@@ -1,7 +1,17 @@
+"""
+
+This is ship detection model. It follows a typical CNN (Convolutional Neural Network) architecture commonly
+used for classification tasks. In this architecture, there are two classes: ship and no ship, indicated by
+the single neuron in the output layer with a sigmoid activation function. The choise to use this model is
+influenced by the dataset's characteristics, specifically the fact that around 65% of the images do not feature ships.
+
+"""
+
 from tensorflow.keras.models import Sequential
 from tensorflow import keras
 
-# Опис моделі
+
+# Model architecture
 model = Sequential([
     keras.layers.Conv2D(8, (3, 3), activation='relu', input_shape=(768, 768, 3)),
     keras.layers.MaxPooling2D((2, 2)),
@@ -14,14 +24,14 @@ model = Sequential([
     keras.layers.Dense(1, activation='sigmoid')
 ])
 
-# Компіляція моделі
+# Model compilation
 model.compile(optimizer='adam',
               loss='binary_crossentropy',
               metrics=['accuracy'])
 
 model.summary()
 
-# Визначення генераторів для навчання та валідації
+# Create train and validation ImageDataGenerator
 train_data_dir = 'data/train_data'
 valid_data_dir = 'data/valid_data'
 
@@ -40,15 +50,15 @@ valid_generator = valid_datagen.flow_from_directory(
     batch_size=32,
     class_mode='binary')
 
+# Model callbacks
 callbacks = [
+    # Save the best model.
     keras.callbacks.ModelCheckpoint("ship_detection_model.keras", save_best_only=True, verbose=1),
-    keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=1),
-    keras.callbacks.ReduceLROnPlateau(monitor='val_dice_coef', factor=0.5,
-                                         patience=3, verbose=1, mode='max',
-                                         epsilon=0.0001, cooldown=2, min_lr=1e-6)
+    # Write logs to TensorBoard
+    keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=1)
 ]
 
-# Навчання моделі
+# Train the model
 history = model.fit(
     train_generator,
     steps_per_epoch=train_generator.samples / train_generator.batch_size,
