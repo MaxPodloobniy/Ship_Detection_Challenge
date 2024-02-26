@@ -1,0 +1,4 @@
+ship_detection_model.keras
+.DS_Store
+.idea/
+__pycache__/
