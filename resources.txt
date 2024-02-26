@@ -3,6 +3,6 @@ Example of Semantic Segmentation with U-Net-- https://github.com/hlamba28/UNET-T
 Pandarallel for Pandas on multiple cores-- https://github.com/nalepae/pandarallel.git
 Image Segmentation for U-Net-like architecture-- https://keras.io/examples/vision/oxford_pets_image_segmentation/
 Example of solution-- https://www.kaggle.com/code/kmader/baseline-u-net-model-part-1#Build-a-Model
-
+Useful examples of loss functions https://github.com/shruti-jadon/Semantic-Segmentation-Loss-Functions/
 
 
