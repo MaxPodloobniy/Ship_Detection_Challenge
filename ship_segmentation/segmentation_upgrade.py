@@ -1,7 +1,8 @@
 """
 
 After learning my model on 40k images I got dice score on validation set for about 0.75, model works rather well even
-with this score, but I want more, so I decided to change loss function, make data augmentation and learn it with another 15 epochs
+with this score, but I want more, so I decided to change loss function, make data augmentation, add dropout to prevent
+overfitting and learn it with another 15 epochs.
 
 """
 
@@ -134,5 +135,3 @@ new_callbacks = [
 
 # Train the model
 history = new_seg_model.fit(train_dataset, validation_data=valid_dataset, epochs=12, callbacks=new_callbacks)
-
-
