@@ -1,20 +1,20 @@
 """
 
 After learning my model on 40k images I got dice score on validation set for about 0.75, model works rather well even
-with this score, but I want more, so I decided to change loss function, make data augmentation and learn it on whole
-dataset with ships(62k-validation instead of 40k)
+with this score, but I want more, so I decided to change loss function, make data augmentation and learn it with another 15 epochs
 
 """
 
 import os
+import keras.backend as K
+import tensorflow as tf
 from tensorflow import data as tf_data
 from tensorflow import image as tf_image
 from tensorflow import io as tf_io
-
 from tensorflow import keras
 from keras.models import load_model
-from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-import keras.backend as K
+from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard, EarlyStopping
+
 
 
 def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=16):
@@ -50,7 +50,7 @@ def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=16):
     return dataset
 
 
-img_dir = '/Users/maxim/working_dir/train_v2'
+img_dir = '/Users/maxim/aug/train_v2'
 mask_dir = '/Users/maxim/working_dir/masks'
 
 # Generate and sort lists of absolute paths to input images and masks
@@ -59,7 +59,7 @@ masks_paths = [os.path.join(mask_dir, str(filename)) for filename in sorted(os.l
 print('Image paths loaded')
 
 # Slice images and masks path to train and validation lists
-val_samples = 12000
+val_samples = 8000
 train_input_img_paths = images_paths[:-val_samples]
 train_target_img_paths = masks_paths[:-val_samples]
 val_input_img_paths = images_paths[-val_samples:]
@@ -86,4 +86,53 @@ custom_losses = {'dice_p_bce': dice_p_bce,
                  'dice_coef': dice_coef}
 
 old_seg_model = load_model('ship_segmentation/unet_low_filters_model.keras', custom_objects=custom_losses)
+print('Model loaded')
+
+new_seg_model = old_seg_model
+
+# Add dropout regularization to the model to prevent overfitting
+dropout_rate = 0.2
+new_seg_model.add(keras.layers.Dropout(dropout_rate))
+
+
+@tf.keras.utils.register_keras_serializable()
+def generalized_dice_coefficient(y_true, y_pred):
+    smooth = 1.
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    score = (2. * intersection + smooth) / (
+            K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    return score
+
+
+@tf.keras.utils.register_keras_serializable()
+def dice_loss(y_true, y_pred):
+    loss = 1 - generalized_dice_coefficient(y_true, y_pred)
+    return loss
+
+
+@tf.keras.utils.register_keras_serializable()
+def bce_dice_loss(y_true, y_pred):
+    loss = keras.losses.binary_crossentropy(y_true, y_pred) + \
+           dice_loss(y_true, y_pred)
+    return loss / 2.0
+
+
+new_seg_model.compile(optimizer=keras.optimizers.Adam(lr=0.001), loss=bce_dice_loss, metrics=[dice_loss, 'binary_accuracy'])
+
+new_callbacks = [
+    # Save the best model.
+    ModelCheckpoint("unet_low_filters_model_v2.keras", save_best_only=True, verbose=1),
+    # Write logs to TensorBoard
+    TensorBoard(log_dir='./logs_v2', histogram_freq=1),
+    # Adjust learning rate dynamically.
+    ReduceLROnPlateau(monitor='val_dice_loss', factor=0.5,
+                      patience=3, verbose=1, mode='min',
+                      epsilon=0.0001, cooldown=2, min_lr=1e-6)
+]
+
+# Train the model
+history = new_seg_model.fit(train_dataset, validation_data=valid_dataset, epochs=12, callbacks=new_callbacks)
+
 
