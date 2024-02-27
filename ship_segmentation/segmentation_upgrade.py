@@ -1,8 +1,8 @@
 """
 
 After learning my model on 40k images I got dice score on validation set for about 0.75, model works rather well even
-with this score, but I want more, so I decided to change loss function, make data augmentation, add dropout to prevent
-overfitting and learn it with another 15 epochs.
+with this score, but I want more, so I decided to change loss function, make data augmentation and learn it with another
+15 epochs.
 
 """
 
@@ -90,10 +90,6 @@ old_seg_model = load_model('ship_segmentation/unet_low_filters_model.keras', cus
 print('Model loaded')
 
 new_seg_model = old_seg_model
-
-# Add dropout regularization to the model to prevent overfitting
-dropout_rate = 0.2
-new_seg_model.add(keras.layers.Dropout(dropout_rate))
 
 
 @tf.keras.utils.register_keras_serializable()
