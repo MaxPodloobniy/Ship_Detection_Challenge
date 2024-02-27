@@ -51,8 +51,8 @@ def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=16):
     return dataset
 
 
-img_dir = '/Users/maxim/aug/train_v2'
-mask_dir = '/Users/maxim/working_dir/masks'
+img_dir = '/home/maxim/augmented_data/aug_images'
+mask_dir = '/home/maxim/augmented_data/aug_masks'
 
 # Generate and sort lists of absolute paths to input images and masks
 images_paths = [os.path.join(img_dir, str(filename)) for filename in sorted(os.listdir(img_dir))]
