@@ -22,5 +22,17 @@
 плюс використовувати всі 62 тис картинок на навчання/валідацію плюс переробити dice_p_bce
 https://github.com/shruti-jadon/Semantic-Segmentation-Loss-Functions/tree/master/loss_functions.py
 11) в файлі main.py написав код для реалізації всього процесу(завантаження картинки->ship detection->segmentation якщо знайдений
-корабель) резульати більш-менш ок але треба краще
-12)
+корабель) результати більш-менш ок але треба краще
+12) вирішив перенавчити модельб буду використовувати augmented дані, нову loss function і вчить на всьому датасеті, код реалізації
+аугментації зберіг в data_augmentation.py
+
+
+
+
+
+
+'''
+gcloud compute scp instance-template-gpu-20240221-222820:~/working_dir/ship_detection_model.keras /Users/maxim/PycharmProjects/Ship_Detection_Challenge/
+'''
+
+

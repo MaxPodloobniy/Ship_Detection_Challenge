@@ -1,3 +1,11 @@
+"""
+
+After learning my model on 40k images I got dice score on validation set for about 0.75, model works rather well even
+with this score, but I want more, so I decided to change loss function, make data augmentation and learn it on whole
+dataset with ships(62k-validation instead of 40k)
+
+"""
+
 import os
 from tensorflow import data as tf_data
 from tensorflow import image as tf_image

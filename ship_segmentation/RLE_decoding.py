@@ -24,9 +24,9 @@ def decode_and_save_rle_vectorized(rle_str, image_id, image_shape=(768, 768)):
         for r, c, l in zip(row, col, length):
             decoded_mask[r, c:c + l] = 255
         decoded_mask = decoded_mask.T
-    # Save decoded mask as image, all zeros if no ships present
-    mask_path = f'/home/maxim/masks/{image_id}'
-    plt.imsave(mask_path, decoded_mask, cmap='gray')
+        # Save decoded mask as image, use only images with ships for model fitting
+        mask_path = f'/home/maxim/masks/{image_id}'
+        plt.imsave(mask_path, decoded_mask, cmap='gray')
 
 
 # Read the csv file in chunks
