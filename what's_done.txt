@@ -25,7 +25,7 @@ https://github.com/shruti-jadon/Semantic-Segmentation-Loss-Functions/tree/master
 корабель) результати більш-менш ок але треба краще
 12) вирішив перенавчити модельб буду використовувати augmented дані, нову loss function і вчить на всьому датасеті, код реалізації
 аугментації зберіг в data_augmentation.py
-
+13) вийшла якась фігня з тим навчаням, мабуть overfitting замість визначення
 
 
 

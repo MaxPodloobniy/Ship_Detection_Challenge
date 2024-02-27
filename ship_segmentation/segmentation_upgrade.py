@@ -92,7 +92,7 @@ print('Model loaded')
 new_seg_model = old_seg_model
 
 
-@tf.keras.utils.register_keras_serializable()
+@keras.saving.register_keras_serializable()
 def generalized_dice_coefficient(y_true, y_pred):
     smooth = 1.
     y_true_f = K.flatten(y_true)
@@ -103,13 +103,13 @@ def generalized_dice_coefficient(y_true, y_pred):
     return score
 
 
-@tf.keras.utils.register_keras_serializable()
+@keras.saving.register_keras_serializable()
 def dice_loss(y_true, y_pred):
     loss = 1 - generalized_dice_coefficient(y_true, y_pred)
     return loss
 
 
-@tf.keras.utils.register_keras_serializable()
+@keras.saving.register_keras_serializable()
 def bce_dice_loss(y_true, y_pred):
     loss = keras.losses.binary_crossentropy(y_true, y_pred) + \
            dice_loss(y_true, y_pred)

@@ -4,26 +4,38 @@ import tensorflow as tf
 import keras.backend as K
 from tensorflow import image as tf_image
 from tensorflow import io as tf_io
+from tensorflow import keras
 from keras.models import load_model
 from PIL import Image
 
 
-def dice_coef(y_true, y_pred, smooth=1):
-    intersection = K.sum(y_true * y_pred, axis=[1, 2, 3])
-    union = K.sum(y_true, axis=[1, 2, 3]) + K.sum(y_pred, axis=[1, 2, 3])
-    return K.mean((2. * intersection + smooth) / (union + smooth), axis=0)
+@keras.saving.register_keras_serializable()
+def generalized_dice_coefficient(y_true, y_pred):
+    smooth = 1.
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+    intersection = K.sum(y_true_f * y_pred_f)
+    score = (2. * intersection + smooth) / (
+            K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    return score
 
 
-def dice_p_bce(in_gt, in_pred):
-    return 1e-3*tf.keras.losses.binary_crossentropy(in_gt, in_pred) - dice_coef(in_gt, in_pred)
+@keras.saving.register_keras_serializable()
+def dice_loss(y_true, y_pred):
+    loss = 1 - generalized_dice_coefficient(y_true, y_pred)
+    return loss
 
 
-custom_losses = {'dice_p_bce': dice_p_bce,
-                 'dice_coef': dice_coef}
+@keras.saving.register_keras_serializable()
+def bce_dice_loss(y_true, y_pred):
+    loss = keras.losses.binary_crossentropy(y_true, y_pred) + \
+           dice_loss(y_true, y_pred)
+    return loss / 2.0
 
-ship_detection_model = load_model('/Users/maxim/PycharmProjects/Ship_Detection_Challenge/ship_detection_model.keras')
+
+ship_detection_model = load_model('/Users/maxim/PycharmProjects/Ship_Detection_Challenge/ship_detection/ship_detection_model.keras')
 print('Ship detection model loaded')
-unet_low_filters_model = load_model('/Users/maxim/PycharmProjects/Ship_Detection_Challenge/unet_low_filters_model.keras', custom_objects=custom_losses)
+unet_low_filters_model = load_model('/Users/maxim/unet_low_filters_model_v2.keras')
 print('Ship segmentation model loaded')
 
 
@@ -55,16 +67,20 @@ def predict_and_visualize(image_path):
     input_img = preprocess_image(image_path)
     ship_prediction = ship_detection_model.predict(input_img)
 
-    if ship_prediction > 0.6:
+
+    if ship_prediction > 0.55:
         segmentation_result = unet_low_filters_model.predict(input_img)
         segmentation_result = tf.squeeze(segmentation_result, axis=0)
         visualize_mask(image_path, segmentation_result)
     else:
         print(f'Ships not found on image {image_path}')
+        segmentation_result = unet_low_filters_model.predict(input_img)
+        segmentation_result = tf.squeeze(segmentation_result, axis=0)
+        visualize_mask(image_path, segmentation_result)
 
 
 test_img_dir = '/Users/maxim/airbus-ship-detection/airbus-ship-detection/test_v2'
-test_img_list = sorted(os.listdir(test_img_dir))[:11]
+test_img_list = sorted(os.listdir(test_img_dir))[:20]
 
 for image_id in test_img_list:
     full_path = os.path.join(test_img_dir, image_id)
