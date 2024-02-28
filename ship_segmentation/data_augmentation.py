@@ -42,7 +42,6 @@ def adjust_brightness_contrast(image, mask):
 
 def add_gaussian_noise(image, mask):
     # Adds Gaussian noise to the input image.
-
     noise_stddev = 0.05 # noise standard deviation
 
     # Generate Gaussian noise as float32
@@ -53,7 +52,7 @@ def add_gaussian_noise(image, mask):
     noisy_image = tf.clip_by_value(noisy_image, 0, 255)
     noisy_image = tf.cast(noisy_image, tf.uint8)
 
-    return noisy_image, mask
+    return (noisy_image, mask)
 
 
 def random_method_chose(input_img, mask):
@@ -92,16 +91,17 @@ def augment_and_save_data(base_dir, imgs_dir, masks_dir):
     counter = 0
     for image_id, mask_id in zip(imgs_list, masks_list):
         input_img = tf_io.read_file(os.path.join(imgs_dir, image_id))
-        mask = tf_io.read_file(os.path.join(masks_dir, image_id))
+        mask = tf_io.read_file(os.path.join(masks_dir, mask_id))
         input_img = tf_io.decode_jpeg(input_img, channels=3)
         mask = tf_io.decode_jpeg(mask, channels=1)
-        input_img = tf.cast(input_img, np.uint8)
-        mask = tf.cast(mask, np.uint8)
+
+        input_img = tf.cast(input_img, tf.uint8)
+        mask = tf.cast(mask, tf.uint8)
 
         aug_image, aug_mask = random_method_chose(input_img, mask)
 
-        plt.imsave(os.path.join(aug_images_dir, os.path.basename(image_id)), aug_image.numpy())
-        plt.imsave(os.path.join(aug_masks_dir, os.path.basename(mask_id)), aug_mask.numpy().squeeze(), cmap='gray')
+        plt.imsave(os.path.join(aug_images_dir, os.path.basename(image_id)), aug_image)
+        plt.imsave(os.path.join(aug_masks_dir, os.path.basename(mask_id)), aug_mask, cmap='gray')
 
     if counter % 10000 == 0:
         print(f"Processing {counter} image")
