@@ -172,7 +172,6 @@ def dice_p_bce(in_gt, in_pred):
     Combined loss function that combines binary cross-entropy and Dice coefficient for training segmentation models.
     Reference:
     - https://www.kaggle.com/code/kmader/baseline-u-net-model-part-1#Build-a-Model
-    - https://github.com/shruti-jadon/Semantic-Segmentation-Loss-Functions/tree/master/loss_functions.py
 
     :param in_gt: Ground truth binary labels.
     :param in_pred: Predicted binary labels.

@@ -100,8 +100,10 @@ def augment_and_save_data(base_dir, imgs_dir, masks_dir):
 
         aug_image, aug_mask = random_method_chose(input_img, mask)
 
-        plt.imsave(os.path.join(aug_images_dir, os.path.basename(image_id)), aug_image)
-        plt.imsave(os.path.join(aug_masks_dir, os.path.basename(mask_id)), aug_mask, cmap='gray')
+
+
+        plt.imsave(os.path.join(aug_images_dir, os.path.basename(image_id)), aug_image.numpy())
+        plt.imsave(os.path.join(aug_masks_dir, os.path.basename(mask_id)), aug_mask.numpy().squeeze(), cmap='gray')
 
     if counter % 10000 == 0:
         print(f"Processing {counter} image")
