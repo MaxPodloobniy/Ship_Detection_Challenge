@@ -26,7 +26,7 @@ evaluating ship detection model.
 - **ship_segmentation/**: Contains files for RLE decoding, training, 
 upgrading and evaluating ship detection model.
 ### File Descriptions
-- **main.py**: 
+- **model_evaluation.py**: Models evaluation
 - **dataset_for_detection.py**: Script for ship detection dataset creation
 - **ship_detection_model.py**: Script for creating and training model 
 - **ship_detection_model.zip**: Compressed ship detection model
@@ -34,6 +34,10 @@ upgrading and evaluating ship detection model.
 ship segmentation model
 - **segmentation_model.py**: Script for creating and training segmentation model
 - **ship_segmentation_model.keras**: U-Net Segmentation model
+- **data_augmentation.py**: Code for creating new dataset by using data augmentation
+- **segmentation_upgrade.py**: Upgrading segmentation model by using new dataset
+and loss function
+- **ship_segmentation_model_v2.keras**: New segmentationmodel
 - **what's_done.txt**: File where I wrote all my progress while doing thing 
 project
 - **resourses.txt**: File containing articles and examples from which I sourced 

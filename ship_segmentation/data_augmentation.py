@@ -52,7 +52,7 @@ def add_gaussian_noise(image, mask):
     noisy_image = tf.clip_by_value(noisy_image, 0, 255)
     noisy_image = tf.cast(noisy_image, tf.uint8)
 
-    return (noisy_image, mask)
+    return noisy_image, mask
 
 
 def random_method_chose(input_img, mask):

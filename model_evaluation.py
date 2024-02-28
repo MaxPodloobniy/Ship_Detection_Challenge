@@ -33,9 +33,9 @@ def bce_dice_loss(y_true, y_pred):
     return loss / 2.0
 
 
-ship_detection_model = load_model('/Users/maxim/PycharmProjects/Ship_Detection_Challenge/ship_detection/ship_detection_model.keras')
+ship_detection_model = load_model('ship_detection/ship_detection_model.keras')
 print('Ship detection model loaded')
-unet_low_filters_model = load_model('/Users/maxim/unet_low_filters_model_v2.keras')
+unet_low_filters_model = load_model('ship_segmentation/ship_segmentation_model_v2.keras')
 print('Ship segmentation model loaded')
 
 
@@ -80,7 +80,7 @@ def predict_and_visualize(image_path):
 
 
 test_img_dir = '/Users/maxim/airbus-ship-detection/airbus-ship-detection/test_v2'
-test_img_list = sorted(os.listdir(test_img_dir))[:20]
+test_img_list = sorted(os.listdir(test_img_dir))[30:50]
 
 for image_id in test_img_list:
     full_path = os.path.join(test_img_dir, image_id)

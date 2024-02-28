@@ -28,13 +28,3 @@ https://github.com/shruti-jadon/Semantic-Segmentation-Loss-Functions/tree/master
 13) чогось після донавччання модель перестала працювати корректно, мабуть overfitting
 14) не overfitting, при аугментації даних допустив помилку і завантажив input images і в картинки і в маски,
 виправив код, перестворив датасет, навчив модель з новою loss function модель стала краще, навіть без ship detection добре працює.
-
-
-
-
-
-'''
-gcloud compute scp instance-template-gpu-20240221-222820:~/working_dir/ship_detection_model.keras /Users/maxim/PycharmProjects/Ship_Detection_Challenge/
-'''
-
-
