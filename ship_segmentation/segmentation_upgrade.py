@@ -2,13 +2,12 @@
 
 After learning my model on 40k images I got dice score on validation set for about 0.75, model works rather well even
 with this score, but I want more, so I decided to change loss function, make data augmentation and learn it with another
-15 epochs.
+15 epochs on new, augmented data.
 
 """
 
 import os
 import keras.backend as K
-import tensorflow as tf
 from tensorflow import data as tf_data
 from tensorflow import image as tf_image
 from tensorflow import io as tf_io
@@ -43,7 +42,7 @@ def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=16):
 
         return input_img, mask
 
-    # Create dataset from tensor slices and aapply load_data function to each element
+    # Create dataset from tensor slices and apply load_data function to each element
     # of dataset, then batch the dataset
     dataset = tf_data.Dataset.from_tensor_slices((img_paths, mask_paths))
     dataset = dataset.map(load_data, num_parallel_calls=tf_data.AUTOTUNE)

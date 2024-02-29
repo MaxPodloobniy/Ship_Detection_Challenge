@@ -35,7 +35,7 @@ def bce_dice_loss(y_true, y_pred):
 
 ship_detection_model = load_model('ship_detection/ship_detection_model.keras')
 print('Ship detection model loaded')
-unet_low_filters_model = load_model('ship_segmentation/ship_segmentation_model_v2.keras')
+segmentation_model_v2 = load_model('ship_segmentation/ship_segmentation_model_v2.keras')
 print('Ship segmentation model loaded')
 
 
@@ -69,14 +69,11 @@ def predict_and_visualize(image_path):
 
 
     if ship_prediction > 0.55:
-        segmentation_result = unet_low_filters_model.predict(input_img)
+        segmentation_result = segmentation_model_v2.predict(input_img)
         segmentation_result = tf.squeeze(segmentation_result, axis=0)
         visualize_mask(image_path, segmentation_result)
     else:
         print(f'Ships not found on image {image_path}')
-        segmentation_result = unet_low_filters_model.predict(input_img)
-        segmentation_result = tf.squeeze(segmentation_result, axis=0)
-        visualize_mask(image_path, segmentation_result)
 
 
 test_img_dir = '/Users/maxim/airbus-ship-detection/airbus-ship-detection/test_v2'

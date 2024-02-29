@@ -37,7 +37,7 @@ ship segmentation model
 - **data_augmentation.py**: Code for creating new dataset by using data augmentation
 - **segmentation_upgrade.py**: Upgrading segmentation model by using new dataset
 and loss function
-- **ship_segmentation_model_v2.keras**: New segmentationmodel
+- **ship_segmentation_model_v2.keras**: New segmentation model
 - **what's_done.txt**: File where I wrote all my progress while doing thing 
 project
 - **resourses.txt**: File containing articles and examples from which I sourced 
@@ -60,9 +60,3 @@ For the ship detection model, I employed a training dataset consisting
 of 50,000 samples, complemented by a validation dataset of 10,000 samples. 
 Continuing the evaluation, the model demonstrated a validation accuracy 
 of 0.8534.
-
-### References
-#### Models
-....
-#### Datasets
-....
