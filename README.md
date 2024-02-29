@@ -27,8 +27,9 @@ evaluating ship detection model.
 upgrading and evaluating ship detection model.
 ### File Descriptions
 - **model_evaluation.py**: Models evaluation
+- **eda-for-ship-detection.ipynb**: File with exploratory data analysis
 - **dataset_for_detection.py**: Script for ship detection dataset creation
-- **ship_detection_model.py**: Script for creating and training model 
+- **ship_detection_model.py**: Script for creating and training detection model 
 - **ship_detection_model.zip**: Compressed ship detection model
 - **RLE_decoding**: Script for decoding RLE string and creating dataset for
 ship segmentation model
