@@ -67,17 +67,13 @@ def predict_and_visualize(image_path):
     input_img = preprocess_image(image_path)
     ship_prediction = ship_detection_model.predict(input_img)
 
-
-    if ship_prediction > 0.55:
-        segmentation_result = segmentation_model_v2.predict(input_img)
-        segmentation_result = tf.squeeze(segmentation_result, axis=0)
-        visualize_mask(image_path, segmentation_result)
-    else:
-        print(f'Ships not found on image {image_path}')
+    segmentation_result = segmentation_model_v2.predict(input_img)
+    segmentation_result = tf.squeeze(segmentation_result, axis=0)
+    visualize_mask(image_path, segmentation_result)
 
 
-test_img_dir = '/Users/maxim/airbus-ship-detection/airbus-ship-detection/test_v2'
-test_img_list = sorted(os.listdir(test_img_dir))[30:50]
+test_img_dir = '/Users/maxim/airbus-ship-detection/test_v2'
+test_img_list = sorted(os.listdir(test_img_dir))[140:160]
 
 for image_id in test_img_list:
     full_path = os.path.join(test_img_dir, image_id)

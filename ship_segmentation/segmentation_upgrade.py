@@ -16,7 +16,6 @@ from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard, EarlyStopping
 
 
-
 def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=16):
     """
     Creates a TensorFlow Dataset object from input and output images.

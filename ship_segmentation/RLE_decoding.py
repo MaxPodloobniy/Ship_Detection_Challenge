@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-
 def decode_and_save_rle_vectorized(rle_str, image_id, image_shape=(768, 768)):
     """
     This function decodes the RLE (Run-Length Encoding) encoded string and saves it as an i
@@ -15,16 +14,16 @@ def decode_and_save_rle_vectorized(rle_str, image_id, image_shape=(768, 768)):
     """
     decoded_mask = np.zeros(image_shape, dtype=np.uint8)
     # If string isn`t empty, so there is a ship/ships on image
-    if rle_str != 'nan' and len(rle_str) != 0:
+    if pd.notnull(rle_str) and len(rle_str) != 0:
         pairs = np.array(rle_str.split(), dtype=np.int32)
-        start = pairs[::2] # Extract starting positions
-        length = pairs[1::2] # Extract lengths of runs
-        row = start // image_shape[1] # Calculate row indices using image width
-        col = start % image_shape[1] # Calculate column indices using image width
+        start = pairs[::2]  # Extract starting positions
+        length = pairs[1::2]  # Extract lengths of runs
+        row = start // image_shape[1]  # Calculate row indices using image width
+        col = start % image_shape[1]  # Calculate column indices using image width
         for r, c, l in zip(row, col, length):
             decoded_mask[r, c:c + l] = 255
         decoded_mask = decoded_mask.T
-        # Save decoded mask as image, use only images with ships for model fitting
+
         mask_path = f'/home/maxim/masks/{image_id}'
         plt.imsave(mask_path, decoded_mask, cmap='gray')
 
