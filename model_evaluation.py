@@ -7,32 +7,7 @@ from tensorflow import keras
 from PIL import Image
 
 
-@keras.saving.register_keras_serializable()
-def generalized_dice_coefficient(y_true, y_pred):
-    smooth = 1.
-    y_true_f = tf.reshape(y_true, [-1])
-    y_pred_f = tf.reshape(y_pred, [-1])
-    intersection = tf.reduce_sum(y_true_f * y_pred_f)
-    score = (2. * intersection + smooth) / (tf.reduce_sum(y_true_f) + tf.reduce_sum(y_pred_f) + smooth)
-    return score
-
-
-@keras.saving.register_keras_serializable()
-def dice_loss(y_true, y_pred):
-    loss = 1 - generalized_dice_coefficient(y_true, y_pred)
-    return loss
-
-
-@keras.saving.register_keras_serializable()
-def bce_dice_loss(y_true, y_pred):
-    loss = keras.losses.binary_crossentropy(y_true, y_pred) + \
-           dice_loss(y_true, y_pred)
-    return loss / 2.0
-
-
-ship_detection_model = keras.models.load_model('ship_detection/ship_detection_model.keras')
-print('Ship detection model loaded')
-segmentation_model_v2 = keras.models.load_model('ship_segmentation/ship_segmentation_model_v2.keras')
+segmentation_model_v2 = keras.models.load_model('ship_segmentation/ship_segmentation_model_v2.keras', compile=False)
 print('Ship segmentation model loaded')
 
 
@@ -62,7 +37,6 @@ def visualize_mask(img_path, segmentation_mask):
 
 def predict_and_visualize(image_path):
     input_img = preprocess_image(image_path)
-    ship_prediction = ship_detection_model.predict(input_img)
 
     segmentation_result = segmentation_model_v2.predict(input_img)
     segmentation_result = tf.squeeze(segmentation_result, axis=0)
