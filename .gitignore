@@ -1,4 +1,6 @@
-ship_detection_model.keras
+.venv/
 .DS_Store
-.idea/
 __pycache__/
+*.pyc
+.idea/
+.vscode/
