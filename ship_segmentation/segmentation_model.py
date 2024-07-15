@@ -1,10 +1,9 @@
 import os
+import tensorflow as tf
 from tensorflow import data as tf_data
 from tensorflow import image as tf_image
 from tensorflow import io as tf_io
 from tensorflow import keras
-from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-import keras.backend as K
 
 
 def get_dataset(img_paths, mask_paths, img_size=(768, 768), batch_size=16):
@@ -144,7 +143,6 @@ outputs = keras.layers.Conv2D(1, 1, activation='sigmoid')(conv11)
 model = keras.Model(inputs, outputs)
 
 
-
 def dice_coef(y_true, y_pred, smooth=1):
     """
     Compute the Dice coefficient for evaluating the similarity between two sets of binary data.
@@ -162,9 +160,14 @@ def dice_coef(y_true, y_pred, smooth=1):
     :param smooth: Smoothing factor to avoid division by zero. Default is 1.
     :return: Dice coefficient computed over the batch dimension.
     """
-    intersection = K.sum(y_true * y_pred, axis=[1, 2, 3])
-    union = K.sum(y_true, axis=[1, 2, 3]) + K.sum(y_pred, axis=[1, 2, 3])
-    return K.mean((2. * intersection + smooth) / (union + smooth), axis=0)
+    y_true = tf.cast(y_true, tf.float32)
+    y_pred = tf.cast(y_pred, tf.float32)
+
+    intersection = tf.reduce_sum(y_true * y_pred, axis=[1, 2, 3])
+    union = tf.reduce_sum(y_true, axis=[1, 2, 3]) + tf.reduce_sum(y_pred, axis=[1, 2, 3])
+
+    dice = tf.reduce_mean((2. * intersection + smooth) / (union + smooth), axis=0)
+    return dice
 
 
 def dice_p_bce(in_gt, in_pred):
@@ -188,11 +191,11 @@ model.summary()
 # Model callbacks
 callbacks = [
     # Save the best model.
-    ModelCheckpoint("unet_low_filters_model.keras", save_best_only=True, verbose=1),
+    keras.callbacks.ModelCheckpoint("unet_low_filters_model.keras", save_best_only=True, verbose=1),
     # Write logs to TensorBoard
-    TensorBoard(log_dir='./logs', histogram_freq=1),
+    keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=1),
     # Adjust learning rate dynamically.
-    ReduceLROnPlateau(monitor='val_dice_coef', factor=0.5,
+    keras.callbacks.ReduceLROnPlateau(monitor='val_dice_coef', factor=0.5,
                                       patience=3,  verbose=1, mode='max',
                                       epsilon=0.0001, cooldown=2, min_lr=1e-6)
 ]

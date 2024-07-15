@@ -1,22 +1,19 @@
 import os
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import keras.backend as K
 from tensorflow import image as tf_image
 from tensorflow import io as tf_io
 from tensorflow import keras
-from keras.models import load_model
 from PIL import Image
 
 
 @keras.saving.register_keras_serializable()
 def generalized_dice_coefficient(y_true, y_pred):
     smooth = 1.
-    y_true_f = K.flatten(y_true)
-    y_pred_f = K.flatten(y_pred)
-    intersection = K.sum(y_true_f * y_pred_f)
-    score = (2. * intersection + smooth) / (
-            K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    y_true_f = tf.reshape(y_true, [-1])
+    y_pred_f = tf.reshape(y_pred, [-1])
+    intersection = tf.reduce_sum(y_true_f * y_pred_f)
+    score = (2. * intersection + smooth) / (tf.reduce_sum(y_true_f) + tf.reduce_sum(y_pred_f) + smooth)
     return score
 
 
@@ -33,9 +30,9 @@ def bce_dice_loss(y_true, y_pred):
     return loss / 2.0
 
 
-ship_detection_model = load_model('ship_detection/ship_detection_model.keras')
+ship_detection_model = keras.models.load_model('ship_detection/ship_detection_model.keras')
 print('Ship detection model loaded')
-segmentation_model_v2 = load_model('ship_segmentation/ship_segmentation_model_v2.keras')
+segmentation_model_v2 = keras.models.load_model('ship_segmentation/ship_segmentation_model_v2.keras')
 print('Ship segmentation model loaded')
 
 
