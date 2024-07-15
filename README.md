@@ -1,4 +1,5 @@
 ## Introduction  
+![Input example](test_imgs/0b8cde107.jpg)  
 This repository presents my approach to tackling the Airbus Ship Detection 
 Challenge, employing two key models: a ship detection model and a ship 
 segmentation model. I used two models for this, ship detection model and 
@@ -6,6 +7,7 @@ ship segmentation model. I decided to use two models instead of one driven
 by the fact that only 35% of the training images include ships, there's 
 a considerable portion of the dataset where ships are absent, making 
 segmentation challenging.  
+The project was developed using Python 3.10 with TensorFlow 2.15.0, ensuring compatibility with the latest features and optimizations in these tools.  
 ### Segmentation model  
 Let's explore the ship segmentation model, which employs the U-Net architecture. 
 It consists of six downsampling blocks(Conv+Conv+MaxPool) with number of 
@@ -21,16 +23,12 @@ Network approach. It consists of three Conv+MaxPool blocks, along with one fully
 connected Dense layer and an output Dense layer with a sigmoid activation function.
 ## Project Structure Overview
 ### Directories
-- **ship_detection/**: Contains files for creating dataset, training and 
-evaluating ship detection model.
+- **test_imgs/**: Contains examples of input images.
 - **ship_segmentation/**: Contains files for RLE decoding, training, 
 upgrading and evaluating ship detection model.
 ### File Descriptions
 - **model_evaluation.py**: Models evaluation
 - **eda-for-ship-detection.ipynb**: File with exploratory data analysis
-- **dataset_for_detection.py**: Script for ship detection dataset creation
-- **ship_detection_model.py**: Script for creating and training detection model 
-- **ship_detection_model.zip**: Compressed ship detection model
 - **RLE_decoding**: Script for decoding RLE string and creating dataset for
 ship segmentation model
 - **segmentation_model.py**: Script for creating and training segmentation model
@@ -50,14 +48,10 @@ Tesla T4 GPU.
 ##### Loss functions:  
 - **Segmentation model**:  Utilized the custom function dice_p_bce(), which 
 combines binary cross-entropy and Dice coefficient
-- **Detection model**: Employed the built-in binary_crossentropy() loss 
+- **Detection model**: Employed the built-in binary_crossentropy loss 
 function  
 
 For training the segmentation model, I used a dataset with 42k pairs of 
 images and masks, with each image containing at least one ship. Upon 
 validation, the model achieved an accuracy of 0.75 as measured by the 
 Dice coefficient.  
-For the ship detection model, I employed a training dataset consisting 
-of 50,000 samples, complemented by a validation dataset of 10,000 samples. 
-Continuing the evaluation, the model demonstrated a validation accuracy 
-of 0.8534.
